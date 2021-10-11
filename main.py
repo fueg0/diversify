@@ -13,15 +13,15 @@ from spotipy.oauth2 import SpotifyOAuth
 
 keys = open("keys.txt", "r")
 
-client = keys.readline(0)
-client_secret = keys.readline(1)
+client = keys.readline()
+client_secret = keys.readline()
 scope = 'user-library-read'
 
 visited_uris = set()
 visited_related_uris = set()
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=client,
+    client_id=client[:-1],
     client_secret=client_secret,
     redirect_uri='http://localhost:8888/callback',
     scope=scope))
@@ -34,8 +34,10 @@ def artist_related_to_list(artist_related, level):
     for relation in artist_related['artists'][0:7]:
         relation_name = relation['name']
         relation_uri = relation['uri']
-        relation_artist_object = Artist.Artist(relation_name, relation_uri, empty_artist, graph_level=level)
+        relation_artist_object = Artist.Artist(relation_name, relation_uri,
+                                               empty_artist, graph_level=level)
         artist_list.append(relation_artist_object)
+
         if relation_uri not in visited_uris or relation_uri not in visited_related_uris:
             visited_related_uris.add(relation_uri)
 
@@ -105,9 +107,12 @@ for artist_key in users_artists:
     for related_artist in artist.related:
 
         if related_artist.uri in users_artists:
-            print(f"related artist {related_artist.name} in saved artists")
+            print(f"{related_artist.name}  related to  {artist.name}  from saved tracks"
+                  f"        {artist.graph_level}:{related_artist.graph_level}")
             artist.start_relationship(related_artist)
         else:
+            print(f"{related_artist.name}  related to  {artist.name}                   "
+                  f"        {artist.graph_level}:{related_artist.graph_level}")
             artist.add_related_neighbor(related_artist)
 
 for artist_key in users_artists:
@@ -116,7 +121,7 @@ for artist_key in users_artists:
 
     print("Related to:", name)
     for rel_artist in artist.neighbors:
-        print(users_artists[rel_artist].name)
+        print(f"{users_artists[rel_artist].name}   {users_artists[rel_artist].graph_level}")
     print("\n\n")
 
 # related = sp.artist_related_artists(user_artists[0][1])
