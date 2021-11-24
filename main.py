@@ -5,8 +5,8 @@
 #    for new music if you'd like.                         #
 #    Author: Fuego                                        #
 #########################################################
-import time
 
+import time
 import Artist
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -53,7 +53,7 @@ def saved_tracks_to_artists(total_tracks):
 
 
 def track_accumulator(limit, offset, offset_cap):
-    print("\n\nFetching all user tracks - this may take a while")
+    print("\n\nFetching all user tracks - this may take a while depending on the size of your library")
     user_track_artists = {}
     offset_var = offset
     limit_var = limit
@@ -63,7 +63,6 @@ def track_accumulator(limit, offset, offset_cap):
 
         for item in current_tracks['items']:
             track = item['track']
-            #print("song:", track['name'])
             artist_uri = track['artists'][0]['uri']
 
             if artist_uri not in visited_uris:
@@ -89,17 +88,9 @@ def track_accumulator(limit, offset, offset_cap):
             offset_var += limit_var
 
 
+# main
 saved_tracks = sp.current_user_saved_tracks()
 users_artists = saved_tracks_to_artists(saved_tracks['total'])
-
-# for related_artist in related_artists:
-#     if related_artist.graph_level < lowest_neighbor:
-#         lowest_neighbor = related_artist.graph_level
-#     else:
-#         pass
-#
-# if lowest_neighbor < 100:
-#     artist.graph_level = lowest_neighbor
 
 for artist_key in users_artists:
     artist = users_artists[artist_key]
@@ -107,12 +98,10 @@ for artist_key in users_artists:
     for related_artist in artist.related:
 
         if related_artist.uri in users_artists:
-            print(f"{related_artist.name}  related to  {artist.name}  from saved tracks"
-                  f"        {artist.graph_level}:{related_artist.graph_level}")
+            # print(f"{related_artist.name}  related to  {artist.name}  from saved tracks", f"{artist.graph_level}:{related_artist.graph_level}")
             artist.start_relationship(related_artist)
         else:
-            print(f"{related_artist.name}  related to  {artist.name}                   "
-                  f"        {artist.graph_level}:{related_artist.graph_level}")
+            # print(f"{related_artist.name}  related to  {artist.name}", f"{artist.graph_level}:{related_artist.graph_level}")
             artist.add_related_neighbor(related_artist)
 
 for artist_key in users_artists:
@@ -121,10 +110,5 @@ for artist_key in users_artists:
 
     print("Related to:", name)
     for rel_artist in artist.neighbors:
-        print(f"{users_artists[rel_artist].name}   {users_artists[rel_artist].graph_level}")
+        print(f"{users_artists[rel_artist].name}, level {users_artists[rel_artist].graph_level}")
     print("\n\n")
-
-# related = sp.artist_related_artists(user_artists[0][1])
-# print('Related artists for', user_artists[0][0])
-# for artist in related['artists']:
-#     print('  ', artist['name'], '  ', artist['uri'])
